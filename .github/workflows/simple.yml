@@ -17,4 +17,4 @@ jobs:
       - name: Install dep
         run: pip install -r requirements.txt
       - name: Run notebook via pytext
-        run: jupytext population2019.md --set - --execute
+        run: jupytext population2019.md --set-kernel - --execute
