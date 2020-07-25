@@ -28,21 +28,10 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s - %(message)s',
 ```
 
 ```python
-def pandas_df_to_markdown_table(df,name):
-    '''
-    Write the df in name to markdown format
-    '''
-    fmt = ['---' for i in range(len(df.columns))]
-    df_fmt = pd.DataFrame([fmt], columns=df.columns)
-    df_formatted = pd.concat([df_fmt, df])
-    df_formatted.to_csv(name,sep="|", index=False)
+logging.info('last start')
 ```
 
-```python
-logging.info('start')
-```
-
-## Dataset
+## Dataset
 
 ```python
 !mkdir -p data
@@ -74,8 +63,6 @@ pop2019 = pd.read_excel('data/estim-pop-dep-sexe-gca-1975-2019.xls'
 pop2019.head()
 ```
 
-Des colonnes ne sont pas detecté par pandas.La feuille de donnée essaye de créer une agrégation sur des colonnes visuellement.
-
 On donne des noms pertients à ces colonnes en faisant une inspection de la feuille Excel.
 
 ```python
@@ -91,7 +78,7 @@ assert len(pop2019.departements) == len(pop2019.departements.unique())
 les departements sont usuellement sur 2 ou 3 (DOM) caractères
 
 ```python
-all(pop2019.departements.str.len() <=3)
+assert not all(pop2019.departements.str.len() <=3)
 ```
 
 Quelles sont les departements avec plus de deux 3 digits
@@ -155,10 +142,6 @@ data["hommes"].head()
 data["femmes"].head()
 ```
 
-```python
-pandas_df_to_markdown_table(data["ensemble"].head().reset_index(),'peek-csv-table.md')
-```
-
 Le nom des colonnes sont des variables
 
 ```python
@@ -171,25 +154,17 @@ tidys = {segment:to_tidy(df) for segment,df in data.items()}
 ```
 
 ```python
-tidys['femmes'].head()
-```
-
-```python
 france = tidys['ensemble']
 france.nb=france.nb.astype(int)
 ```
 
-```python
-tidy_sample=france.sample(10)
-```
+Apres modification :
 
 ```python
-tidy_sample
+tidy_sample=france.sample(10);tidy_sample
 ```
 
-```python
-pandas_df_to_markdown_table(tidy_sample,'sample-tidy-france.md')
-```
+## Quelques vérification de "bon sens"
 
 ```python
 france = france[france.age!="Total"]
@@ -206,14 +181,18 @@ france_total_dep = (france[['departements','nb']]
 france_total_dep.head()
 ```
 
+Ordre de grandeur (population en million)
+
+
 ```python
-#vérification, ordre de grandeur ok
 france_total_dep.sum()/10**6
 ```
 
 ```python
 pop = "ensemble"
 ```
+
+## Comparaison des départements 59,75,67
 
 ```python
 deps = ['59','75','67']
@@ -228,9 +207,9 @@ sub = sub[sub.departements.isin(deps)]
 france[france.departements.isin(['59','75','67'])]
 ```
 
-```python
-deps = ['59','75','67']
-```
+Pour une comparaison, un rapport est plus pertinent que des chiffres brutes.
+
+On ajoute le pourcentage
 
 ```python
 sub=sub.join(france_total_dep,on="departements")
@@ -243,6 +222,8 @@ sub['pourcentage'] = ((sub['nb'] / sub['total'])*100).round(2)
 ```python
 sub.sort_values('departements')
 ```
+
+On visualise
 
 ```python
 import altair as alt
